@@ -5,6 +5,7 @@ import {usersRoutes} from "./routes/users";
 import {orderItemsRoutes} from "./routes/order-items";
 import {categoriesRoutes} from "./routes/categories";
 import { Request, Response, NextFunction} from "express";
+import {accountRoutes} from "./routes/account";
 
 const express = require('express');
 
@@ -34,3 +35,5 @@ app.use('/api/users', usersRoutes);
 app.use('/api/order-items', orderItemsRoutes);
 
 app.use('/api/categories', categoriesRoutes);
+
+app.use('/api/balance', accountRoutes);

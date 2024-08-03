@@ -77,7 +77,8 @@ export const readAllProduct = async (req: Request, res: Response, next: NextFunc
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*');
+            .select('*')
+            .eq('isAvailable', true);
 
         if (error) {
             logger.error(error);
@@ -114,6 +115,31 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
             .status(200)
             .json({
                 message: 'Product deleted successfully'
+            });
+    } catch (error) {
+        logger.error(error);
+        return res.status(400).json({ message: 'Invalid request data' });
+    }
+};
+
+export const readDayMenuProduct = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .eq('isDayMenu', true)
+            .single();
+
+        if (error) {
+            logger.error(error);
+            return res.status(500).json({message: 'Error occur while reading day menu product'});
+        }
+
+        return res
+            .status(200)
+            .json({
+                data: data,
+                message: 'Day menu product read successfully'
             });
     } catch (error) {
         logger.error(error);
