@@ -4,7 +4,8 @@ import {
     readAllProduct,
     readProductById,
     updateProduct,
-    readDayMenuProduct
+    readDayMenuProduct,
+    readPopularProducts
 } from "../controllers/products";
 
 const express = require('express');
@@ -14,6 +15,8 @@ productsRoutes.get('/list', readAllProduct)
 
 productsRoutes.post('/create', createProduct);
 
+productsRoutes.get('/popular', readPopularProducts);
+
 productsRoutes.get('/day-menu', readDayMenuProduct);
 
 productsRoutes.put('/:id', updateProduct);
@@ -21,4 +24,3 @@ productsRoutes.put('/:id', updateProduct);
 productsRoutes.get('/:id', readProductById);
 
 productsRoutes.delete('/:id', deleteProduct);
-

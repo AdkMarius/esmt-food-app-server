@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction} from "express";
-import { supabase } from "../lib/supabase";
+import {NextFunction, Request, Response} from "express";
+import {supabase} from "../lib/supabase";
 import logger from "../logger";
 
 export const createProduct = async (req: Request, res: Response, next: NextFunction) => {
@@ -77,8 +77,30 @@ export const readAllProduct = async (req: Request, res: Response, next: NextFunc
     try {
         const { data, error } = await supabase
             .from('products')
-            .select('*')
+            .select('*, evaluations(stars)')
             .eq('isAvailable', true);
+
+        const resultMap = new Map();
+
+        if (data) {
+            data.forEach(item => {
+                const totalStars = item.evaluations.reduce((sum, evaluation) => sum + evaluation.stars, 0);
+
+                resultMap.set(item.id, {
+                    id: item.id,
+                    created_at: item.created_at,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image,
+                    isAvailable: item.isAvailable,
+                    isDayMenu: item.isDayMenu,
+                    id_category: item.id_category,
+                    stars: parseInt(String(totalStars / item.evaluations.length))
+                });
+            });
+        }
+
+        const result = Array.from(resultMap.values());
 
         if (error) {
             logger.error(error);
@@ -88,7 +110,7 @@ export const readAllProduct = async (req: Request, res: Response, next: NextFunc
         return res
             .status(200)
             .json({
-                data: data,
+                data: result,
                 message: 'Products read successfully'
             });
     } catch (error) {
@@ -140,6 +162,58 @@ export const readDayMenuProduct = async (req: Request, res: Response, next: Next
             .json({
                 data: data,
                 message: 'Day menu product read successfully'
+            });
+    } catch (error) {
+        logger.error(error);
+        return res.status(400).json({ message: 'Invalid request data' });
+    }
+};
+
+export const readPopularProducts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { data, error } = await supabase
+            .from('evaluations')
+            .select('stars, products!inner(*)');
+
+        const resultMap = new Map();
+
+        if (data) {
+            data.forEach(item => {
+                const productId = item.products.id;
+                if (resultMap.has(productId)) {
+                    const existingProduct = resultMap.get(productId);
+                    existingProduct.stars += item.stars;
+                    existingProduct.count += 1;
+                } else {
+                    resultMap.set(productId, {
+                        stars: item.stars,
+                        count: 1,
+                        products: item.products
+                    });
+                }
+            });
+        }
+
+        resultMap.forEach(item => {
+            item.stars = parseInt(String(item.stars / item.count));
+        });
+
+        const result = Array.from(resultMap.values());
+
+        let sortedData = result.sort((a, b) => b.stars - a.stars);
+
+        sortedData = sortedData.splice(0, 4);
+
+        if (error) {
+            logger.error(error);
+            return res.status(500).json({message: 'Error occur while reading popular products'});
+        }
+
+        return res
+            .status(200)
+            .json({
+                data: sortedData,
+                message: 'Popular products read successfully'
             });
     } catch (error) {
         logger.error(error);

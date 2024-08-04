@@ -20,7 +20,7 @@ ordersRoutes.post('/create', createOrder);
 
 ordersRoutes.get('/user-orders', readAllOrderByUserId);
 
-ordersRoutes.get('/details/:id', readOrderDetails);
+ordersRoutes.get('/details/:user_id', readOrderDetails);
 
 ordersRoutes.put('/:id', updateOrder);
 

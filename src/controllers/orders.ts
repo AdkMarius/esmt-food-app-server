@@ -123,12 +123,12 @@ export const deleteOrder = async (req: Request, res: Response, next: NextFunctio
 
 export const readOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const user_id = req.params.user_id;
 
         const { data, error } =  await supabase
             .from('orders')
             .select('*, order_items(*, products(*))')
-            .eq('id', id);
+            .eq('user_id', user_id);
 
         if (error) {
             logger.error(error);
@@ -139,7 +139,7 @@ export const readOrderDetails = async (req: Request, res: Response, next: NextFu
             .status(200)
             .json({
                 data,
-                message: 'Order deleted successfully'
+                message: 'Order read successfully'
             });
 
     } catch (error) {
@@ -161,7 +161,8 @@ export const readAllOrderByUserId = async (req: Request, res: Response, next: Ne
         const { data, error } = await supabase
             .from('orders')
             .select('*')
-            .eq('user_id', user_id);
+            .eq('user_id', user_id)
+            .order('created_at', { ascending: false });
 
         if (error) {
             logger.error(error);

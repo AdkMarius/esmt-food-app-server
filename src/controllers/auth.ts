@@ -27,24 +27,15 @@ export const signUp = async (req: Request, res: Response) => {
     const {
         email,
         password,
-        group
     } = req.body;
 
-    console.log(email, password, group);
+    console.log(email, password);
 
     if ( (!email || !password) || (!email.length || !password.length)) {
         return res.status(400).json({ message: 'Bad request. All fields are required.' });
     }
 
-    const newUser = (group && group.length) ? {
-        email: email,
-        password: password,
-        options: {
-            data: {
-                group: group
-            }
-        }
-    } : {
+    const newUser =  {
         email: email,
         password: password,
     };
